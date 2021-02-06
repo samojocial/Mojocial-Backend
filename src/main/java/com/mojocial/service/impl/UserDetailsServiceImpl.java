@@ -19,7 +19,7 @@ import com.mojocial.model.AppUser;
 import com.mojocial.model.UserRole;
 import com.mojocial.service.AccountService;
 
-@Service
+@Service("myUserService")
 @Transactional
 public class UserDetailsServiceImpl implements UserDetailsService {
 

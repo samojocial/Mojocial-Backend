@@ -31,6 +31,16 @@ public class AccountResource {
 
 	@Autowired
 	AccountService accountService;
+	
+	@GetMapping("/hello")
+	public ResponseEntity<?> hello() {
+		return new ResponseEntity<>("Hello", HttpStatus.OK);
+	}
+	
+	@GetMapping("/login")
+	public ResponseEntity<?> login() {
+		return new ResponseEntity<>("Login done", HttpStatus.OK);
+	}
 
 	@GetMapping("/list")
 	public ResponseEntity<?> getUsersList() {
@@ -41,11 +51,11 @@ public class AccountResource {
 		return new ResponseEntity<>(users, HttpStatus.OK);
 	}
 
-	@GetMapping("/{username}")
+	@GetMapping("/name/{username}")
 	public ResponseEntity<?> getUserInfo(@PathVariable String username) {
 		AppUser user = accountService.findByUsername(username);
 		if (user == null) {
-			return new ResponseEntity<>("No Users Found.", HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("No Users Found for login.", HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(user, HttpStatus.OK);
 	}

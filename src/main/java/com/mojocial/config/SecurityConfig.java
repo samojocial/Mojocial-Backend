@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -22,6 +23,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	private static final String[] PUBLIC_MATCHERS = { "/user/login", "/user/register", "/user/resetPassword/**", "/image/**" };
 //	private static final String[] PUBLIC_MATCHERS = { "/**" };
+	
+	//@Autowired
+	//private BCryptPasswordEncoder bCryptPasswordEncoder;
 	
 	@Autowired
 	@Qualifier("myUserService")
@@ -39,11 +43,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return new InMemoryUserDetailsManager(user);
 	}*/
 	@Bean
-	public PasswordEncoder passwordEncoder() {
+	public BCryptPasswordEncoder passwordEncoder() {
 	    return new BCryptPasswordEncoder();
 	}
-	@Autowired
-	private BCryptPasswordEncoder bCryptPasswordEncoder;
+	
+	
 
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {	
 	//	auth
@@ -60,9 +64,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 		.and()	
 		.authorizeRequests().antMatchers(PUBLIC_MATCHERS).permitAll()
-		.anyRequest().authenticated().and().formLogin().defaultSuccessUrl("/user/login");
+		.anyRequest().authenticated().and().formLogin()
+		.successHandler(successHandler())
+		.permitAll();
+		//.defaultSuccessUrl("/user/login");
 		//.and()
 		//.addFilter(jwtAuthentication)
 		//.addFilterBefore(new JwtAuthorization(), UsernamePasswordAuthenticationFilter.class);
+	}
+	
+	@Bean
+	public AuthenticationSuccessHandler successHandler() {
+		return new MySuccessHandler("/user/login");
 	}
 }

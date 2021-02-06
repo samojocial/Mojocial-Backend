@@ -13,8 +13,11 @@ import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,8 +38,9 @@ public class AccountServiceImpl implements AccountService {
 	AccountService accountService;
 
 	@Autowired
-	private BCryptPasswordEncoder bCryptPasswordEncoder;
+	private BCryptPasswordEncoder passwordEncoder;
 
+	
 	@Autowired
 	private AppUserRepo appUserRepo;
 
@@ -53,7 +57,7 @@ public class AccountServiceImpl implements AccountService {
 	@Transactional
 	public AppUser saveUser(String name, String username, String email) {
 		String password = RandomStringUtils.randomAlphanumeric(10);
-		String encryptedPassword = bCryptPasswordEncoder.encode(password);
+		String encryptedPassword = passwordEncoder.encode(password);
 		AppUser appUser = new AppUser();
 		appUser.setPassword(encryptedPassword);
 		appUser.setName(name);
@@ -78,7 +82,7 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public void updateUserPassword(AppUser appUser, String newpassword) {
-		String encryptedPassword = bCryptPasswordEncoder.encode(newpassword);
+		String encryptedPassword = passwordEncoder.encode(newpassword);
 		appUser.setPassword(encryptedPassword);
 		appUserRepo.save(appUser);
 		mailSender.send(emailConstructor.constructResetPasswordEmail(appUser, newpassword));
@@ -147,7 +151,7 @@ public class AccountServiceImpl implements AccountService {
 	@Override
 	public void resetPassword(AppUser user) {
 		String password = RandomStringUtils.randomAlphanumeric(10);
-		String encryptedPassword = bCryptPasswordEncoder.encode(password);
+		String encryptedPassword = passwordEncoder.encode(password);
 		user.setPassword(encryptedPassword);
 		appUserRepo.save(user);
 		mailSender.send(emailConstructor.constructResetPasswordEmail(user, password));
