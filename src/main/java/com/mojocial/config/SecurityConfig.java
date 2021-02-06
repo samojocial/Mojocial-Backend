@@ -16,12 +16,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
-	private static final String[] PUBLIC_MATCHERS = { "/user/login", "/user/register", "/user/resetPassword/**", "/image/**" };
+	private static final String[] PUBLIC_MATCHERS = { "/loginSubmit", "/user/login", "/user/register", "/user/resetPassword/**", "/image/**" };
 //	private static final String[] PUBLIC_MATCHERS = { "/**" };
 	
 	//@Autowired
@@ -30,6 +31,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	@Qualifier("myUserService")
 	private UserDetailsService userDetailsService;
+	
+	@Autowired
+	private JwtAuthenticationEntryPoint jwtAuthenticationPoint;
+	
+	@Autowired
+	private JwtRequestFilter jwtRequestFilter;
+	
 	/*
 	@Bean
 	@Override
@@ -64,13 +72,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 		.and()	
 		.authorizeRequests().antMatchers(PUBLIC_MATCHERS).permitAll()
-		.anyRequest().authenticated().and().formLogin()
-		.successHandler(successHandler())
-		.permitAll();
-		//.defaultSuccessUrl("/user/login");
+		.anyRequest().authenticated()
+		.and().exceptionHandling().authenticationEntryPoint(jwtAuthenticationPoint);
+		//.and().formLogin()
+		//.successHandler(successHandler())
+		//.permitAll();
+		//.defaultSuccessUrl("/user/login")
 		//.and()
 		//.addFilter(jwtAuthentication)
 		//.addFilterBefore(new JwtAuthorization(), UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 	
 	@Bean
